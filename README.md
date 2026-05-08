@@ -60,6 +60,7 @@ If you have not published to npm, installation should use the GitHub URL shown a
 ```ts
 import {
   createRedeemWidget,
+  createAjaxTransport,
   defaultBankNormalizer,
   defaultGames,
   defaultProviders,
@@ -78,6 +79,12 @@ const widget = createRedeemWidget({
   normalize: defaultBankNormalizer,
   providers: defaultProviders,
   games: defaultGames,
+  transport: createAjaxTransport({
+    ajax: window.ajax,
+    requestType: "post",
+    async: true,
+    custom: true,
+  }),
 });
 
 widget.mount("#redeem-widget-root");
@@ -160,14 +167,28 @@ Canonical payload shape:
 
 ## Custom Transport
 
-By default the widget uses `fetch`.
-For legacy stacks, provide your own `transport`:
+By default the widget uses `fetch`, but examples below are ordered by practical usage.
+
+### 1) ajax() + handler.php flow (recommended for legacy PHP stacks)
+
+```ts
+import { createAjaxTransport } from "@redeem/widget";
+
+transport: createAjaxTransport({
+  ajax: window.ajax,
+  requestType: "post",
+  async: true,
+  custom: true,
+});
+```
+
+### 2) Fully custom transport function
 
 ```ts
 transport: async ({ url, method, body }) => {
   const response = await legacyAjaxClient(url, method, body);
   return response;
-}
+};
 ```
 
 ## Development

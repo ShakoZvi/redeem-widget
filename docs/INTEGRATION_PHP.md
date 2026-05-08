@@ -16,6 +16,7 @@ Integrating widget into server-rendered pages where user/session metadata comes 
 ```ts
 import {
   createRedeemWidget,
+  createAjaxTransport,
   defaultBankNormalizer,
   defaultGames,
   defaultProviders,
@@ -34,6 +35,12 @@ const widget = createRedeemWidget({
   normalize: defaultBankNormalizer,
   providers: defaultProviders,
   games: defaultGames,
+  transport: createAjaxTransport({
+    ajax: window.ajax, // keep existing handler.php security/request pipeline
+    requestType: "post",
+    async: true,
+    custom: true,
+  }),
 });
 
 widget.mount("#redeem-widget-root");
@@ -45,3 +52,4 @@ document.querySelector("#open-redeem")?.addEventListener("click", () => widget.o
 - Do not hardcode secrets inside frontend code.
 - Keep server-side validation mandatory for `userHash` and redeem permissions.
 - If backend response differs, provide custom adapter via `normalize`.
+- If your platform requires requests through existing `ajax()` + `handler.php` flow, use `createAjaxTransport` and keep transport as `post`.

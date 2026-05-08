@@ -3,6 +3,7 @@ import "./styles/redeem-widget.css";
 export { createRedeemWidget } from "./widget";
 export { defaultBankNormalizer, canonicalBankNormalizer } from "./adapters/defaultBankNormalizer";
 export { defaultGames, defaultProviders } from "./core/defaultCatalog";
+export { createAjaxTransport } from "./transports/ajaxTransport";
 
 export type {
   BankConfig,
@@ -21,3 +22,4 @@ export type {
   UIConfig,
   WidgetState,
 } from "./types";
+export type { LegacyAjaxFn } from "./transports/ajaxTransport";

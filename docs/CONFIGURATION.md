@@ -63,6 +63,19 @@ transport: async ({ url, method = "POST", body = {} }) => {
 };
 ```
 
+For projects that must keep existing `ajax()` handler/security flow:
+
+```ts
+import { createAjaxTransport } from "@redeem/widget";
+
+transport: createAjaxTransport({
+  ajax: window.ajax,
+  requestType: "post",
+  async: true,
+  custom: true,
+});
+```
+
 ## Hooks (`config.hooks`)
 
 - `onOpen()`
