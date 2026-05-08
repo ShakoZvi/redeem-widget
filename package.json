@@ -1,0 +1,48 @@
+{
+  "name": "@redeem/widget",
+  "version": "0.1.0",
+  "description": "Reusable redeem widget with configurable adapters and transports.",
+  "type": "module",
+  "main": "dist/redeem-widget.umd.js",
+  "module": "dist/redeem-widget.esm.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/redeem-widget.esm.js",
+      "default": "./dist/redeem-widget.umd.js"
+    },
+    "./react": {
+      "types": "./dist/react/RedeemWidget.d.ts",
+      "import": "./dist/react/RedeemWidget.js"
+    },
+    "./styles.css": "./dist/redeem-widget.css"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "prepare": "npm run build",
+    "build": "node ./scripts/build.mjs && tsc -p tsconfig.json --emitDeclarationOnly",
+    "test": "vitest run",
+    "dev:test": "vitest"
+  },
+  "keywords": [
+    "redeem",
+    "widget",
+    "freespin",
+    "frontend"
+  ],
+  "author": "",
+  "license": "MIT",
+  "peerDependencies": {
+    "react": ">=18.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "@types/react": "^19.1.2",
+    "esbuild": "^0.25.5",
+    "typescript": "^5.8.3",
+    "vitest": "^3.2.4"
+  }
+}

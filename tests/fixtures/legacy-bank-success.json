@@ -1,0 +1,20 @@
+{
+  "status": "success",
+  "total_freespins": 8,
+  "data": {
+    "1": {
+      "PRIZE_TYPE_ID": 1,
+      "AMOUNT": 5,
+      "EM": 1,
+      "MASS_PRIZE_VALUE": 0.15,
+      "ELIGIBLE_FRSP": 1
+    },
+    "20": {
+      "PRIZE_TYPE_ID": 20,
+      "AMOUNT": 3,
+      "EM": 1,
+      "MASS_PRIZE_VALUE": 0.4,
+      "ELIGIBLE_FRSP": 0
+    }
+  }
+}

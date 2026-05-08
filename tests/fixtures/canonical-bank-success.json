@@ -1,0 +1,17 @@
+{
+  "totalFreespins": 12,
+  "games": {
+    "1": {
+      "amount": 6,
+      "em": 1,
+      "eligibleFrsp": 1,
+      "massPrizeValue": 0.15
+    },
+    "20": {
+      "amount": 6,
+      "em": 1,
+      "eligibleFrsp": 1,
+      "massPrizeValue": 0.4
+    }
+  }
+}
