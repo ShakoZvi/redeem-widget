@@ -45,11 +45,15 @@ Install directly from your git repository:
 npm i git+https://github.com/ShakoZvi/redeem-widget.git
 ```
 
-If you publish it later, package name is:
+This repository is public and can be installed directly from GitHub.
+The package import name is:
 
 ```bash
 @redeem/widget
 ```
+
+Note: `@redeem/widget` is the package name used in imports.  
+If you have not published to npm, installation should use the GitHub URL shown above.
 
 ## Quick Start (Vanilla/PHP Host)
 
