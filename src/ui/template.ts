@@ -32,7 +32,7 @@ export function renderTemplate(options: TemplateOptions): string {
       const disabled = !game.active;
       const selectedClass = game.id === selectedGameId ? "is-selected" : "";
       return `<button type="button" class="${classPrefix}-game ${selectedClass} ${disabled ? "is-disabled" : ""}" data-role="game" data-game-id="${game.id}" ${disabled ? "disabled" : ""}>
-        <span class="${classPrefix}-game-image ${game.imgClass}"></span>
+        <span class="${classPrefix}-game-image ${game.imgClass}" data-role="game-image" data-game-id="${game.id}" data-img-class="${game.imgClass}"></span>
         <span class="${classPrefix}-game-value">${gameValueLabel(game)}</span>
         <span class="${classPrefix}-game-amount">${game.amount}</span>
       </button>`;
@@ -41,12 +41,13 @@ export function renderTemplate(options: TemplateOptions): string {
 
   const selectedAmount = selected ? selected.amount : ui.labels.emptyValue;
   const selectedValue = selected ? gameValueLabel(selected) : ui.labels.emptyValue;
+  const titleId = `${classPrefix}-dialog-title`;
 
   return `
     <div class="${classPrefix}-overlay" data-role="overlay"></div>
-    <div class="${classPrefix}-modal" role="dialog" aria-modal="true" aria-label="${ui.labels.title}">
+    <div class="${classPrefix}-modal" data-role="dialog" role="dialog" aria-modal="true" aria-labelledby="${titleId}" tabindex="-1">
       <div class="${classPrefix}-header">
-        <strong>${ui.labels.title}</strong>
+        <strong id="${titleId}">${ui.labels.title}</strong>
         <button type="button" data-role="close" class="${classPrefix}-close">${ui.labels.close}</button>
       </div>
       <div class="${classPrefix}-body">

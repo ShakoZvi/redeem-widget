@@ -6,6 +6,7 @@ import type {
   ProviderDefinition,
   RenderProvider,
   RulesConfig,
+  ThemeConfig,
   UIConfig,
   WidgetState,
 } from "../types";
@@ -31,6 +32,12 @@ export const defaultBankConfig: BankConfig = {
 
 export const defaultUIConfig: UIConfig = {
   popularSlice: 7,
+  preserveActiveTab: true,
+  clearSelectedGameOnProviderChange: true,
+  autoSelectFirstActiveGame: false,
+  closeOnOverlayClick: true,
+  closeOnEscape: true,
+  trapFocus: true,
   labels: {
     title: "Redeem",
     popular: "Popular Games",
@@ -40,8 +47,32 @@ export const defaultUIConfig: UIConfig = {
   },
 };
 
-export const defaultThemeConfig = {
+export const defaultThemeConfig: ThemeConfig = {
   classPrefix: "rw",
+  tokens: {
+    overlayBackground: "rgba(10, 13, 28, 0.6)",
+    modalBackground: "#0e1325",
+    modalBorderColor: "#253159",
+    textColor: "#ffffff",
+    fontFamily: '"AdjaraSemiBold", "Helvetica Neue", Arial, sans-serif',
+    providerBackground: "linear-gradient(159.58deg, #343748 12.59%, #161721 75.9%)",
+    providerActiveBackground: "linear-gradient(180deg, #54578d 0%, #4f4181 49.16%, #2f1b4f 100%)",
+    gameBackground: "#383a49",
+    gameSelectedBackground: "linear-gradient(180deg, #039855 -105.26%, #01321c 100%)",
+    footerBackground: "linear-gradient(269.27deg, #161722 23.78%, #383a49 99.5%)",
+    selectionBackground: "linear-gradient(174.6deg, #1b1c2c 14.9%, #036036 120.33%)",
+    actionPrimaryBackground: "#039855",
+    actionPrimaryHoverBackground: "#047a47",
+    borderRadiusSm: "6px",
+    borderRadiusMd: "8px",
+    borderRadiusLg: "12px",
+  },
+  providerBackgrounds: {},
+  providerActiveBackgrounds: {},
+  gameBackgrounds: {},
+  gameBackgroundsByClass: {},
+  providerBackgroundList: [],
+  gameBackgroundList: [],
 };
 
 export function createInitialState(): WidgetState {

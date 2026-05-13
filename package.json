@@ -19,8 +19,12 @@
     "./styles.css": "./dist/redeem-widget.css"
   },
   "files": [
-    "dist"
+    "dist",
+    "bin"
   ],
+  "bin": {
+    "redeem-widget-install": "bin/redeem-widget-install.mjs"
+  },
   "scripts": {
     "prepare": "npm run build",
     "build": "node ./scripts/build.mjs && tsc -p tsconfig.json --emitDeclarationOnly",

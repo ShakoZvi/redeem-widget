@@ -52,6 +52,12 @@ export interface BankConfig {
 
 export interface UIConfig {
   popularSlice: number;
+  preserveActiveTab: boolean;
+  clearSelectedGameOnProviderChange: boolean;
+  autoSelectFirstActiveGame: boolean;
+  closeOnOverlayClick: boolean;
+  closeOnEscape: boolean;
+  trapFocus: boolean;
   labels: {
     title: string;
     popular: string;
@@ -63,6 +69,40 @@ export interface UIConfig {
 
 export interface ThemeConfig {
   classPrefix: string;
+  tokens: Partial<ThemeTokens>;
+  providerBackgrounds: Record<string, string>;
+  providerActiveBackgrounds: Record<string, string>;
+  gameBackgrounds: Record<string, string>;
+  gameBackgroundsByClass: Record<string, string>;
+  providerBackgroundList: Array<{
+    providerId: string;
+    background: string;
+    activeBackground?: string;
+  }>;
+  gameBackgroundList: Array<{
+    gameId?: string;
+    imgClass?: string;
+    background: string;
+  }>;
+}
+
+export interface ThemeTokens {
+  overlayBackground: string;
+  modalBackground: string;
+  modalBorderColor: string;
+  textColor: string;
+  fontFamily: string;
+  providerBackground: string;
+  providerActiveBackground: string;
+  gameBackground: string;
+  gameSelectedBackground: string;
+  footerBackground: string;
+  selectionBackground: string;
+  actionPrimaryBackground: string;
+  actionPrimaryHoverBackground: string;
+  borderRadiusSm: string;
+  borderRadiusMd: string;
+  borderRadiusLg: string;
 }
 
 export interface RedeemWidgetConfig {
@@ -117,4 +157,17 @@ export interface RenderGame extends GameDefinition {
 export interface RenderProvider {
   provider: ProviderDefinition;
   games: RenderGame[];
+}
+
+export interface RedeemConfigAppConfig extends Omit<RedeemWidgetConfig, "endpoints"> {
+  endpoint?: string;
+  redeemEndpoint?: string;
+  endpoints?: {
+    bank: string;
+    redeem: string;
+  };
+  mountTo?: string | HTMLElement;
+  openButtonSelector?: string;
+  autoMount?: boolean;
+  openOnInit?: boolean;
 }
