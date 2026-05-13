@@ -23,7 +23,9 @@ export function renderTemplate(options: TemplateOptions): string {
   const providerButtons = providers
     .map((item) => {
       const isActive = item.provider.id === activeProviderId;
-      return `<button type="button" class="${classPrefix}-provider ${isActive ? "is-active" : ""}" data-role="provider" data-provider-id="${item.provider.id}">${item.provider.name}</button>`;
+      const iconClass = item.provider.icon || "";
+      const iconSpan = `<span class="${classPrefix}-provider-icon ${iconClass}" data-role="provider-icon" data-provider-id="${item.provider.id}" data-icon-class="${iconClass}"></span>`;
+      return `<button type="button" class="${classPrefix}-provider ${isActive ? "is-active" : ""}" data-role="provider" data-provider-id="${item.provider.id}">${iconSpan}<span class="${classPrefix}-provider-name">${item.provider.name}</span></button>`;
     })
     .join("");
 
@@ -39,8 +41,9 @@ export function renderTemplate(options: TemplateOptions): string {
     })
     .join("");
 
-  const selectedAmount = selected ? selected.amount : ui.labels.emptyValue;
-  const selectedValue = selected ? gameValueLabel(selected) : ui.labels.emptyValue;
+  const selectionLabel = selected
+    ? `${selected.amount} x ${gameValueLabel(selected)}`
+    : ui.labels.emptyValue;
   const titleId = `${classPrefix}-dialog-title`;
 
   return `
@@ -55,7 +58,7 @@ export function renderTemplate(options: TemplateOptions): string {
         <div class="${classPrefix}-games">${gameCards || `<div class="${classPrefix}-empty">No games</div>`}</div>
       </div>
       <div class="${classPrefix}-footer">
-        <div class="${classPrefix}-selection">${selectedAmount} x ${selectedValue}</div>
+        <div class="${classPrefix}-selection">${selectionLabel}</div>
         <button type="button" data-role="redeem" class="${classPrefix}-redeem" ${!selected || isLoading ? "disabled" : ""}>
           ${isLoading ? "..." : ui.labels.redeem}
         </button>

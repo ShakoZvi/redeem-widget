@@ -155,10 +155,13 @@ interface ProviderDefinition {
   type: "freespin" | "tableGames" | "cashPrize";
   active?: boolean;                            // default true
   sortOrder?: number;                          // default 0
+  icon?: string;                               // CSS class added to the provider-icon span; used for theme.providerIconBackgroundsByClass lookup
 }
 ```
 
 A virtual "popular" provider is auto-injected at the front if you do not include one. To opt out, include a provider with `id: "popular"` yourself.
+
+The provider tab renders as `[icon][name]`. The icon span is hidden by default — it becomes visible only when a `background` is resolved for it via `theme.providerIconBackgrounds`, `theme.providerIconBackgroundsByClass`, or `theme.providerIconBackgroundList`.
 
 ---
 
@@ -314,7 +317,7 @@ Default:
 | `labels.popular`     | `"Popular Games"`     | Name of the auto-injected popular provider tab.            |
 | `labels.redeem`      | `"Redeem"`            | Primary action button text.                                |
 | `labels.close`       | `"Close"`             | Close button text.                                        |
-| `labels.emptyValue` | `"--"`                | Placeholder when no game is selected (footer "amount x value"). |
+| `labels.emptyValue` | `"--"`                | Footer text shown alone while no game is selected. After selection the footer becomes `"{amount} x {value}"`. |
 
 Localization example:
 
@@ -363,9 +366,12 @@ Default:
   },
   providerBackgrounds: {},
   providerActiveBackgrounds: {},
+  providerIconBackgrounds: {},
+  providerIconBackgroundsByClass: {},
   gameBackgrounds: {},
   gameBackgroundsByClass: {},
   providerBackgroundList: [],
+  providerIconBackgroundList: [],
   gameBackgroundList: [],
 }
 ```
@@ -378,9 +384,12 @@ You can also configure runtime backgrounds without writing custom selectors:
 
 - `providerBackgrounds[provider.id]` - default provider tab background (CSS background value)
 - `providerActiveBackgrounds[provider.id]` - active-state provider tab background
+- `providerIconBackgrounds[provider.id]` - icon next to the provider name (per provider id)
+- `providerIconBackgroundsByClass[provider.icon]` - icon background looked up by `ProviderDefinition.icon` class
 - `gameBackgrounds[game.id]` - game image background by `GameDefinition.id` (highest priority)
 - `gameBackgroundsByClass[game.imgClass]` - fallback game image background by `imgClass`
 - `providerBackgroundList[]` - array alternative for provider backgrounds
+- `providerIconBackgroundList[]` - array alternative for provider icons (`providerId` or `iconClass`)
 - `gameBackgroundList[]` - array alternative for game backgrounds
 
 Example:
@@ -393,6 +402,10 @@ theme: {
   },
   providerActiveBackgrounds: {
     pragmatic: "linear-gradient(180deg, #8c5ca3 4.73%, #2c1731 89.51%)",
+  },
+  providerIconBackgrounds: {
+    pragmatic: "url('/static/assets/redeem/providers/icons/pragmatic.svg') center / contain no-repeat",
+    egt:       "url('/static/assets/redeem/providers/icons/egt.svg') center / contain no-repeat",
   },
   gameBackgrounds: {
     gatesOfOlympus: "url('/static/assets/redeem/games/gates.webp') center / cover no-repeat",

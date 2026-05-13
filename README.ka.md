@@ -465,7 +465,7 @@ normalize: function (raw) {
 | `popular` | `"Popular Games"` | Popular ტაბის სახელი. |
 | `redeem` | `"Redeem"` | მთავარი ღილაკი. |
 | `close` | `"Close"` | close ღილაკი. |
-| `emptyValue` | `"--"` | footer-ი, როცა თამაში არ არის არჩეული. |
+| `emptyValue` | `"--"` | footer-ი, როცა თამაში არ არის არჩეული. ამ დროს ჩანს მხოლოდ ეს ლეიბლი; თამაშის არჩევის შემდეგ footer იცვლება `"{amount} x {value}"`-ად. |
 
 ---
 
@@ -482,8 +482,9 @@ normalize: function (raw) {
 **Provider / game backgrounds კონფიგიდან**
 
 - `providerBackgrounds`, `providerActiveBackgrounds` — `providerId` → ნებისმიერი CSS `background` მნიშვნელობა.
+- `providerIconBackgrounds`, `providerIconBackgroundsByClass` — პატარა icon სახელის წინ; პროვაიდერის სიის `[icon][name]` ლეიაუტისთვის. resolve-დება `providerId`-ით ან `ProviderDefinition.icon` კლასით.
 - `gameBackgrounds`, `gameBackgroundsByClass` — `game.id` ან `imgClass` → CSS `background`.
-- `providerBackgroundList`, `gameBackgroundList` — array ფორმატი (დინამიკური გენერაციისთვის მოსახერხებელია).
+- `providerBackgroundList`, `providerIconBackgroundList`, `gameBackgroundList` — array ფორმატი (დინამიკური გენერაციისთვის მოსახერხებელია).
 
 **თამაშის background resolve თანმიმდევრობა**
 
@@ -625,6 +626,10 @@ rw.createRedeemWidget({
     },
     providerActiveBackgrounds: {
       pragmatic: "linear-gradient(180deg, #8c5ca3 4.73%, #2c1731 89.51%)",
+    },
+    providerIconBackgrounds: {
+      pragmatic: "url('/static/assets/redeem/providers/icons/pragmatic.svg') center / contain no-repeat",
+      egt:       "url('/static/assets/redeem/providers/icons/egt.svg') center / contain no-repeat",
     },
     gameBackgrounds: {
       gatesOfOlympus: "url('/static/assets/redeem/games/gates.webp') center / cover no-repeat",

@@ -94,6 +94,15 @@ theme: {
   providerActiveBackgrounds: {
     pragmatic: "linear-gradient(180deg, #8c5ca3 4.73%, #2c1731 89.51%)",
   },
+  // Provider icons rendered to the LEFT of the provider name.
+  providerIconBackgrounds: {
+    pragmatic: "url('/static/assets/redeem/providers/icons/pragmatic.svg') center / contain no-repeat",
+    egt:       "url('/static/assets/redeem/providers/icons/egt.svg') center / contain no-repeat",
+  },
+  // Or by ProviderDefinition.icon class:
+  providerIconBackgroundsByClass: {
+    iconPragmatic: "url('/static/assets/redeem/providers/icons/pragmatic.svg') center / contain no-repeat",
+  },
   gameBackgrounds: {
     gatesOfOlympus: "url('/static/assets/redeem/games/gates.webp') center / cover no-repeat",
   },
@@ -121,6 +130,10 @@ theme: {
       providerId: "egt",
       background: "linear-gradient(180deg, #ff7a18, #af002d)",
     },
+  ],
+  providerIconBackgroundList: [
+    { providerId: "pragmatic", background: "url('/static/assets/redeem/providers/icons/pragmatic.svg') center / contain no-repeat" },
+    { iconClass:  "iconEgt",   background: "url('/static/assets/redeem/providers/icons/egt.svg') center / contain no-repeat" },
   ],
   gameBackgroundList: [
     { gameId: "gatesOfOlympus", background: "url('/static/assets/redeem/games/gates.webp') center / cover no-repeat" },
@@ -157,11 +170,14 @@ When you need finer control, target the actual classes the widget emits. All cla
 
 ### Providers
 
-| Class                       | Element                          | Purpose                                |
-| --------------------------- | -------------------------------- | -------------------------------------- |
-| `.rw-providers`             | container of provider buttons   | flex row, wraps                        |
-| `.rw-provider`              | single provider button          | `data-role="provider"`                 |
-| `.rw-provider.is-active`    | currently selected provider     | visual selected state                  |
+| Class                              | Element                                 | Purpose                                                                  |
+| ---------------------------------- | --------------------------------------- | ------------------------------------------------------------------------ |
+| `.rw-providers`                    | container of provider buttons           | flex row, wraps                                                          |
+| `.rw-provider`                     | single provider button                  | `data-role="provider"` — flex layout `[icon][name]`                      |
+| `.rw-provider.is-active`           | currently selected provider             | visual selected state                                                    |
+| `.rw-provider-icon`                | icon span before the provider name      | `data-role="provider-icon"`; hidden by default, visible when bg resolved |
+| `.rw-provider-icon.is-visible`     | icon when a background is applied       | toggled automatically by the widget                                      |
+| `.rw-provider-name`                | span wrapping the provider's text label | useful for typography overrides                                          |
 
 ### Games
 
@@ -189,7 +205,9 @@ When you need finer control, target the actual classes the widget emits. All cla
 
 - `data-role="overlay"`
 - `data-role="provider"` + `data-provider-id="..."`
-- `data-role="game"` + `data-game-id="..."` + `data-img-class="..."`
+- `data-role="provider-icon"` + `data-provider-id="..."` + `data-icon-class="..."`
+- `data-role="game"` + `data-game-id="..."`
+- `data-role="game-image"` + `data-game-id="..."` + `data-img-class="..."`
 - `data-role="redeem"`
 - `data-role="close"`
 

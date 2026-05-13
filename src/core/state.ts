@@ -69,9 +69,12 @@ export const defaultThemeConfig: ThemeConfig = {
   },
   providerBackgrounds: {},
   providerActiveBackgrounds: {},
+  providerIconBackgrounds: {},
+  providerIconBackgroundsByClass: {},
   gameBackgrounds: {},
   gameBackgroundsByClass: {},
   providerBackgroundList: [],
+  providerIconBackgroundList: [],
   gameBackgroundList: [],
 };
 

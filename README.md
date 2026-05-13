@@ -515,7 +515,7 @@ Controls **what appears** in lists after rules are evaluated.
 | `popular` | `"Popular Games"` | Name of injected popular tab. |
 | `redeem` | `"Redeem"` | Primary button. |
 | `close` | `"Close"` | Close button (also used for a11y label on icon-style close). |
-| `emptyValue` | `"--"` | Footer when no game selected. |
+| `emptyValue` | `"--"` | Footer text shown alone while no game is selected. After selecting a game the footer switches to `"{amount} x {value}"`. |
 
 ---
 
@@ -533,8 +533,9 @@ Controls **what appears** in lists after rules are evaluated.
 **Provider / game images via config**
 
 - `providerBackgrounds`, `providerActiveBackgrounds` — maps `providerId` → any valid CSS `background` shorthand.
+- `providerIconBackgrounds`, `providerIconBackgroundsByClass` — small icon to the LEFT of the provider name, by `providerId` or by `ProviderDefinition.icon` class.
 - `gameBackgrounds`, `gameBackgroundsByClass` — maps `game.id` or `imgClass` → CSS `background`.
-- `providerBackgroundList`, `gameBackgroundList` — array form for dynamic configs.
+- `providerBackgroundList`, `providerIconBackgroundList`, `gameBackgroundList` — array form for dynamic configs.
 
 **Game background resolution order**
 
@@ -892,6 +893,10 @@ var redeemConfig = {
     },
     providerActiveBackgrounds: {
       pragmatic: "linear-gradient(180deg, #8c5ca3 4.73%, #2c1731 89.51%)",
+    },
+    providerIconBackgrounds: {
+      pragmatic: "url('/static/assets/redeem/providers/icons/pragmatic.svg') center / contain no-repeat",
+      egt:       "url('/static/assets/redeem/providers/icons/egt.svg') center / contain no-repeat",
     },
     gameBackgrounds: {
       gatesOfOlympus: "url('/static/assets/redeem/games/gates.webp') center / cover no-repeat",

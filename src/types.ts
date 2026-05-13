@@ -6,6 +6,7 @@ export interface ProviderDefinition {
   type: ProviderType;
   active?: boolean;
   sortOrder?: number;
+  icon?: string;
 }
 
 export interface GameDefinition {
@@ -72,12 +73,19 @@ export interface ThemeConfig {
   tokens: Partial<ThemeTokens>;
   providerBackgrounds: Record<string, string>;
   providerActiveBackgrounds: Record<string, string>;
+  providerIconBackgrounds: Record<string, string>;
+  providerIconBackgroundsByClass: Record<string, string>;
   gameBackgrounds: Record<string, string>;
   gameBackgroundsByClass: Record<string, string>;
   providerBackgroundList: Array<{
     providerId: string;
     background: string;
     activeBackground?: string;
+  }>;
+  providerIconBackgroundList: Array<{
+    providerId?: string;
+    iconClass?: string;
+    background: string;
   }>;
   gameBackgroundList: Array<{
     gameId?: string;

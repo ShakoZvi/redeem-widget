@@ -161,6 +161,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  gap: 6px;
 
   border: 1px solid #20212e;
   border-radius: var(--rw-radius-md);
@@ -182,6 +183,25 @@
   color: #ffffff;
   background: var(--rw-provider-active-bg);
   border: 1.5px solid rgba(121, 121, 162, 1);
+}
+
+.rw-provider-icon {
+  display: none;
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  background-position: center;
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+
+.rw-provider-icon.is-visible {
+  display: inline-block;
+}
+
+.rw-provider-name {
+  display: inline-block;
+  line-height: 1;
 }
 
 /* games panel

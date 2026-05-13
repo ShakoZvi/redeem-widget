@@ -149,6 +149,13 @@ export function createRedeemWidget(config: RedeemWidgetConfig): RedeemWidgetInst
       }
     }
 
+    const providerIconBackgroundsFromList = new Map<string, string>();
+    const providerIconBackgroundsByClassFromList = new Map<string, string>();
+    for (const item of theme.providerIconBackgroundList) {
+      if (item.providerId) providerIconBackgroundsFromList.set(item.providerId, item.background);
+      if (item.iconClass) providerIconBackgroundsByClassFromList.set(item.iconClass, item.background);
+    }
+
     const gameBackgroundsFromList = new Map<string, string>();
     const gameBackgroundsByClassFromList = new Map<string, string>();
     for (const item of theme.gameBackgroundList) {
@@ -169,6 +176,26 @@ export function createRedeemWidget(config: RedeemWidgetConfig): RedeemWidgetInst
         providerButton.style.background = resolvedBackground;
       } else {
         providerButton.style.removeProperty("background");
+      }
+    });
+
+    root.querySelectorAll<HTMLElement>('[data-role="provider-icon"]').forEach((iconEl) => {
+      const providerId = iconEl.dataset.providerId;
+      const iconClass = iconEl.dataset.iconClass;
+      const backgroundFromId = providerId
+        ? theme.providerIconBackgrounds[providerId] || providerIconBackgroundsFromList.get(providerId)
+        : undefined;
+      const backgroundFromClass = iconClass
+        ? theme.providerIconBackgroundsByClass[iconClass] || providerIconBackgroundsByClassFromList.get(iconClass)
+        : undefined;
+      const resolvedBackground = backgroundFromId || backgroundFromClass;
+
+      if (resolvedBackground) {
+        iconEl.style.background = resolvedBackground;
+        iconEl.classList.add("is-visible");
+      } else {
+        iconEl.style.removeProperty("background");
+        iconEl.classList.remove("is-visible");
       }
     });
 
