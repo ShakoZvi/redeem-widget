@@ -19,6 +19,7 @@ The package is designed to be:
 - [Quick Start (React Host)](#quick-start-react-host)
 - [How It Works](#how-it-works)
 - [Configuration Reference](#configuration-reference)
+- [Configuration Guide (Step-by-Step)](#configuration-guide-step-by-step)
 - [Adapters And Normalization](#adapters-and-normalization)
 - [Custom Transport](#custom-transport)
 - [Accessing Backend Response Data](#accessing-backend-response-data)
@@ -220,7 +221,7 @@ For legacy PHP pages you can use a single high-level initializer:
 - `filters`: provider/game visibility filters
 - `bank`: amount calculation settings (`unitValue`, precision, total mode)
 - `ui`: labels and UX behavior (tab persistence, auto-select, keyboard/overlay close)
-- `theme`: class prefix + provider/game background maps
+- `theme`: class prefix, design tokens (`theme.tokens`), and provider/game background maps
 - `transport`: override default `fetch` transport
 - `hooks`: lifecycle hooks (open, close, select, data loaded, redeem success/error)
 
@@ -231,6 +232,348 @@ Detailed docs:
 - `docs/ARCHITECTURE.md` - internal data flow
 - `docs/INTEGRATION_PHP.md` - PHP / `ajax()` + `handler.php` integration
 - `docs/INTEGRATION_REACT.md` - React integration
+
+## Configuration Guide (Step-by-Step)
+
+This section is a practical playbook: how to assemble a working config from zero, in what order, and what every field does. Use it together with `docs/CONFIGURATION.md` for the full reference.
+
+### Two ways to initialize the widget
+
+| Approach | When to use it |
+| -------- | -------------- |
+| `createRedeemWidget(config)` | You want full control: mount container, bind your own buttons, call `open()`/`close()` yourself. |
+| `RedeemConfigApp.init(config)` | Legacy/vanilla pages: shorthand endpoints, optional auto-mount, optional `openButtonSelector`. |
+
+Both accept the same logical options. `RedeemConfigApp.init` adds convenience fields (`endpoint`, `redeemEndpoint`, `mountTo`, `openButtonSelector`, `autoMount`, `openOnInit`) and maps them to `createRedeemWidget` internally.
+
+---
+
+### Step 0 — Prerequisites on the host page
+
+Before writing config, ensure:
+
+1. **CSS and JS are loaded** (UMD example):
+
+   ```html
+   <link rel="stylesheet" href="static/assets/redeem-widget/redeem-widget.css">
+   <script src="static/assets/redeem-widget/redeem-widget.umd.js"></script>
+   ```
+
+2. **A mount container exists** in the DOM (for example `<div id="redeem-widget-root"></div>`). The widget renders inside this element.
+
+3. **Your backend contract is known**: which PHP (or API) file returns bank data, which performs redeem, and what JSON shape they return.
+
+4. **If you use `ajax()` + `handler.php`**: `window.ajax` must exist before init, and endpoint strings must be **bare filenames** (for example `redeem_bank.php`), not paths like `/WebServices/redeem_bank.php`.
+
+---
+
+### Step 1 — Choose required fields (minimum viable config)
+
+Every working config must provide:
+
+| Field | Purpose |
+| ----- | ------- |
+| `endpoints.bank` | Where to load bank state (or `endpoint` when using `RedeemConfigApp.init`). |
+| `endpoints.redeem` | Where to submit redeem (or `redeemEndpoint` with the facade). |
+| `getContext` | Function returning an object merged into **every** request body (user id, hash, locale, etc.). |
+| `normalize` | Function that converts your bank response into the canonical internal model. |
+| `providers` | Array of provider definitions (tabs). You can start with `defaultProviders`. |
+| `games` | Array of game definitions (catalog). You can start with `defaultGames`. |
+
+Optional but common in PHP stacks:
+
+| Field | Purpose |
+| ----- | ------- |
+| `transport` | Use `createAjaxTransport({ ajax: window.ajax, ... })` instead of default `fetch`. |
+
+Everything else (`rules`, `filters`, `bank`, `ui`, `theme`, `hooks`) layers behavior and UX on top.
+
+---
+
+### Step 2 — Endpoints (`endpoints` or facade aliases)
+
+**`endpoints.bank`** (string)
+
+- With **default `fetch` transport**: use a full URL path your server exposes (for example `/api/redeem/bank`).
+- With **`createAjaxTransport` + `handler.php`**: use only the WebService **filename** (for example `redeem_bank.php`). The handler resolves it relative to `WebServices/` and rejects invalid paths.
+
+**`endpoints.redeem`** (string)
+
+- Same rules as `bank`: full URL with `fetch`, filename only with `ajax()` + handler.
+
+**Facade shorthand** (`RedeemConfigApp.init` only)
+
+- `endpoint` → same as `endpoints.bank`
+- `redeemEndpoint` → same as `endpoints.redeem`
+
+You can still pass `endpoints: { bank, redeem }` explicitly if you prefer.
+
+---
+
+### Step 3 — Context (`getContext`)
+
+**Type:** `() => Record<string, unknown> | Promise<Record<string, unknown>>`
+
+**What it does:** The returned object is **spread/merged** into the body of both bank and redeem requests (together with any extra fields the transport adds).
+
+**Typical PHP host:**
+
+```js
+getContext: function () {
+  return {
+    user_id: document.body.dataset.userId,
+    userHash: document.body.dataset.userHash,
+  };
+},
+```
+
+**Rules of thumb:**
+
+- Never hardcode secrets in `getContext`.
+- Keys must match what your WebService expects (`user_id`, `userHash`, etc.).
+- If you need async session lookup, return a `Promise` from `getContext`.
+
+---
+
+### Step 4 — Normalization (`normalize`)
+
+**Type:** `(raw: unknown) => CanonicalBankPayload`
+
+**What it does:** Your bank endpoint can return any JSON shape. The widget only understands the **canonical** model:
+
+```ts
+{
+  totalFreespins: number;
+  games: Record<number, {
+    amount: number;
+    em: number;
+    eligibleFrsp: number;
+    massPrizeValue: number;
+    descrpt?: string;
+    vendor?: string;
+  }>;
+}
+```
+
+**Built-ins:**
+
+- `defaultBankNormalizer` — legacy `{ data, total_freespins }`-style payloads.
+- `canonicalBankNormalizer` — already-canonical payloads.
+
+**Custom:** Implement your own function that reads `raw` and returns the object above. You can wrap the default:
+
+```js
+normalize: function (raw) {
+  if (raw && raw.customFlag) {
+    return myCustomMapper(raw);
+  }
+  return rw.defaultBankNormalizer(raw);
+},
+```
+
+---
+
+### Step 5 — Catalogs (`providers` and `games`)
+
+**`providers: ProviderDefinition[]`**
+
+Each provider becomes a tab (unless filtered out).
+
+| Property | Required | Description |
+| -------- | -------- | ----------- |
+| `id` | yes | Stable string id. Referenced by games via `providerId`. |
+| `name` | yes | Label shown on the tab button. |
+| `type` | yes | `"freespin"` \| `"tableGames"` \| `"cashPrize"` — used internally for typing. |
+| `active` | no | Optional visibility flag in catalog. |
+| `sortOrder` | no | Lower sorts first among non-popular providers. |
+
+If you omit a provider with `id: "popular"`, the package **auto-injects** a synthetic popular tab (see `resolveProviders` in source).
+
+**`games: GameDefinition[]`**
+
+Each game is one selectable row when its provider tab is active.
+
+| Property | Required | Description |
+| -------- | -------- | ----------- |
+| `id` | yes | Unique id for selection and for `theme.gameBackgrounds`. |
+| `typeId` | yes | **Must match** the numeric key in `CanonicalBankPayload.games` from the bank response. |
+| `providerId` | yes | Must match a `ProviderDefinition.id`. |
+| `imgClass` | yes | CSS class on the image span; also used by `theme.gameBackgroundsByClass`. |
+| `value` | yes | Nominal value shown as `{value}₾` in the UI. |
+| `label` | no | Optional display override. |
+
+---
+
+### Step 6 — Transport (`transport`)
+
+**Default:** browser `fetch` POST with JSON body.
+
+**PHP legacy:** `createAjaxTransport({ ajax: window.ajax, requestType: "post", async: true, custom: true })` keeps your existing `ajax()` → `handler.php` → WebService pipeline.
+
+**Custom:** Any async function `(request) => unknown` where `request` has `{ url, method?, body? }`.
+
+---
+
+### Step 7 — Rules (`rules`, all optional with defaults)
+
+Merged with defaults from the package. Controls **which games are clickable** (`active`).
+
+| Field | Default | Meaning |
+| ----- | ------- | ------- |
+| `selectableMassPrizeValue` | `null` | If set to a number, only games whose bank `massPrizeValue` matches (within float tolerance) can be selected. |
+| `minAmountToEnable` | `1` | Game disabled if `amount < minAmountToEnable`. |
+| `requireAffordableBalance` | `true` | If `true`, game disabled when `game.value > totalAmount` (total amount derived from freespins × `bank.unitValue`). |
+| `requireEligibleFrsp` | `false` | If `true`, also requires `eligibleFrsp === 1` from bank data. |
+
+**`active` computation (simplified):** a game is active when bank `em === 1` and all enabled rules above pass.
+
+---
+
+### Step 8 — Filters (`filters`, optional)
+
+Controls **what appears** in lists after rules are evaluated.
+
+| Field | Default | Meaning |
+| ----- | ------- | ------- |
+| `hideGamesWithoutApi` | `true` | Hide catalog games that have no matching `typeId` entry in the bank payload. |
+| `hideZeroAmountGames` | `false` | Hide games with `amount === 0`. |
+| `hideProvidersWithoutGames` | `true` | Hide provider tabs that would have zero visible games. |
+
+---
+
+### Step 9 — Bank totals (`bank`, optional)
+
+| Field | Default | Meaning |
+| ----- | ------- | ------- |
+| `totalFreespinsMode` | `"response"` | `"response"` — use `payload.totalFreespins` from normalizer. `"sumAll"` — sum all `amount` values. `"sumByMassPrizeValue"` — sum amounts filtered by `rules.selectableMassPrizeValue` when set. |
+| `unitValue` | `0.15` | Currency value per freespin unit; used to compute `totalAmount` for affordability checks. |
+| `precision` | `2` | Decimal places for derived totals. |
+
+---
+
+### Step 10 — UI behavior and labels (`ui`, optional)
+
+**Behavior flags**
+
+| Field | Default | Meaning |
+| ----- | ------- | ------- |
+| `popularSlice` | `7` | Max number of games in the auto-generated **Popular** tab. |
+| `preserveActiveTab` | `true` | After bank reload, keep the same provider tab if it still exists. |
+| `clearSelectedGameOnProviderChange` | `true` | When user switches provider tab, clear selected game. |
+| `autoSelectFirstActiveGame` | `false` | After load, auto-select first active game in the current tab. |
+| `closeOnOverlayClick` | `true` | Click outside modal (overlay) closes. |
+| `closeOnEscape` | `true` | `Escape` closes modal. |
+| `trapFocus` | `true` | Keep keyboard focus inside the modal while open. |
+
+**`labels`**
+
+| Key | Default | Where it appears |
+| --- | ------- | ---------------- |
+| `title` | `"Redeem"` | Dialog accessible name / header. |
+| `popular` | `"Popular Games"` | Name of injected popular tab. |
+| `redeem` | `"Redeem"` | Primary button. |
+| `close` | `"Close"` | Close button (also used for a11y label on icon-style close). |
+| `emptyValue` | `"--"` | Footer when no game selected. |
+
+---
+
+### Step 11 — Theme (`theme`, optional)
+
+**`classPrefix`** (default `"rw"`)
+
+- Prefix for all widget CSS classes (`rw-modal`, `rw-game`, ...). State classes (`is-open`, `is-active`, ...) are not prefixed.
+
+**`tokens`** (partial `ThemeTokens`)
+
+- Key-value map of design tokens applied as **CSS custom properties** on the widget shell (for example `--rw-modal-bg`). See `src/core/state.ts` for the full default token set.
+- Use this for fast rebranding without editing package CSS.
+
+**Provider / game images via config**
+
+- `providerBackgrounds`, `providerActiveBackgrounds` — maps `providerId` → any valid CSS `background` shorthand.
+- `gameBackgrounds`, `gameBackgroundsByClass` — maps `game.id` or `imgClass` → CSS `background`.
+- `providerBackgroundList`, `gameBackgroundList` — array form for dynamic configs.
+
+**Game background resolution order**
+
+1. `theme.gameBackgrounds[game.id]`
+2. `theme.gameBackgroundList` entry with matching `gameId`
+3. `theme.gameBackgroundsByClass[game.imgClass]`
+4. `theme.gameBackgroundList` entry with matching `imgClass`
+5. Built-in CSS / host overrides
+
+---
+
+### Step 12 — Hooks (`hooks`, optional)
+
+| Hook | When it runs |
+| ---- | ------------ |
+| `onOpen` | Modal opened (`open()`). |
+| `onClose` | Modal closed (`close()` or overlay/Esc). |
+| `onSelect` | User picked a game (after click). |
+| `onDataLoaded` | After bank response normalized; receives `CanonicalBankPayload`. |
+| `onRedeemSuccess` | After redeem transport resolves successfully. |
+| `onRedeemError` | Redeem throws or rejects. |
+
+Use hooks to sync external DOM (totals, toasts) without forking the widget.
+
+---
+
+### Step 13 — Widget instance API (after init)
+
+| Method | Use |
+| ------ | --- |
+| `mount(selectorOrElement)` | Attach widget DOM (if not using `RedeemConfigApp` auto-mount). |
+| `open()` | Show modal (starts visible shell state; bank may already be loading from mount). |
+| `close()` | Hide modal. |
+| `reload()` | Re-fetch bank data. |
+| `destroy()` | Remove DOM and listeners. |
+
+**`RedeemConfigApp` extras**
+
+| Method / option | Meaning |
+| ---------------- | ------- |
+| `init(config)` | Creates widget, mounts unless `autoMount: false`, binds `openButtonSelector`. |
+| `getInstance()` | Returns current instance or `null`. |
+| `destroy()` | Destroys instance and open-button listener. |
+| `mountTo` | Selector or element for mount (default `#redeem-widget-root`). |
+| `openButtonSelector` | CSS selector; click calls `open()`. |
+| `autoMount` | Default `true`. Set `false` if you call `mount()` yourself. |
+| `openOnInit` | If `true`, opens modal immediately after init. |
+
+---
+
+### Step 14 — Runtime validation errors
+
+`createRedeemWidget` validates the minimal shape at startup and throws clear errors if:
+
+- `endpoints.bank` / `endpoints.redeem` missing
+- `getContext`, `normalize` not functions
+- `providers` / `games` not arrays
+
+Fix the error message literally: it points to the missing or wrong field.
+
+---
+
+### Step 15 — End-to-end checklist before going live
+
+1. Open DevTools **Network**: bank request returns 200 and JSON your `normalize` understands.
+2. **Console**: no uncaught exceptions during `init` / `mount`.
+3. Click **Redeem** (or call `open()`): modal appears, focus moves inside.
+4. Select a game: footer updates; **Redeem** enables when rules allow.
+5. Submit redeem: success hook runs; bank reloads; modal closes (default redeem flow closes after success in widget code — adjust hooks if you need different UX).
+
+---
+
+### Recommended order when copying a config from another project
+
+1. Copy `endpoints` (or facade `endpoint` / `redeemEndpoint`).
+2. Copy `getContext` keys to match your backend.
+3. Confirm `normalize` matches your bank JSON (use `hooks.onDataLoaded` to log canonical payload once).
+4. Align `games[].typeId` with bank keys.
+5. Tune `rules` / `filters` / `bank` to match promo rules.
+6. Add `theme.tokens` and/or background maps for branding.
+7. Add `hooks` for analytics and external UI sync.
 
 ## Adapters And Normalization
 
