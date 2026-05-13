@@ -1,13 +1,17 @@
 # Redeem Widget
 
-Framework-agnostic redeem widget package for promotions and reward redemption flows.
+A plug-and-play redeem experience for promo and reward flows — designed once, reusable everywhere.
 
-The package is designed to be:
+`@redeem/widget` ships the complete logic of a freespin / prize redeem modal as a single installable package: bank fetch, eligibility rules, provider/game catalogs, self-rendered UI, theming, and post-redeem refresh. Host projects only describe their backend and brand; the widget handles the rest.
 
-- reusable across multiple projects
-- configurable for different backend payload shapes
-- installable directly from git
-- compatible with plain JavaScript hosts and React apps
+**Highlights**
+
+- Drop into any host — vanilla HTML, legacy PHP, modern bundlers, or React.
+- One config to control endpoints, rules, filters, totals, UX, theme, and hooks.
+- Backend-agnostic: pluggable transports (`fetch`, `ajax()` + `handler.php`, custom) and normalizers.
+- Self-rendered, accessible modal with focus trap, `Esc` close, and overlay dismissal.
+- Modern theming via CSS variables (`theme.tokens`) and per-provider/per-game background config.
+- Installable straight from git — every `npm install` keeps host assets in sync via the `redeem-widget-install` CLI.
 
 ## Table Of Contents
 
@@ -87,6 +91,40 @@ In your HTML you only need:
 ```
 
 The UMD bundle exposes everything under the global `window.RedeemWidget`.
+
+### Optional: auto-manage `.gitignore`
+
+When the host project is PHP-served (Node not available on production), the recommended setup is:
+
+- **`node_modules/`** → gitignored (never commit)
+- **`package.json` + `package-lock.json`** → committed (reproducible installs)
+- **`static/assets/redeem-widget/`** → committed (production PHP serves these files)
+
+The CLI can do the gitignore step for you. Pass `--ensure-gitignore` (or `-g`):
+
+```json
+{
+  "scripts": {
+    "postinstall": "redeem-widget-install static/assets/redeem-widget --ensure-gitignore"
+  }
+}
+```
+
+This appends an **idempotent managed block** to your `.gitignore`:
+
+```text
+# >>> @redeem/widget managed-block (do not edit by hand) >>>
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm/
+# <<< @redeem/widget managed-block <<<
+```
+
+Running it again is safe — the block is detected and **not duplicated**. Without the flag the CLI just prints a short hint after copying. Add `--silent` (`-s`) for quiet CI runs.
+
+Full guide and the alternative "gitignore the asset folder too" pattern: [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md).
 
 ## Quick Start (Vanilla/PHP Host)
 
@@ -232,6 +270,10 @@ Detailed docs:
 - `docs/ARCHITECTURE.md` - internal data flow
 - `docs/INTEGRATION_PHP.md` - PHP / `ajax()` + `handler.php` integration
 - `docs/INTEGRATION_REACT.md` - React integration
+- `docs/DEPLOYMENT.md` - git/gitignore workflow + PHP deployment patterns
+- `docs/COMPATIBILITY.md` - React & Node.js compatibility matrix
+- `docs/SECURITY.md` - security boundary and recommendations
+- `docs/RELEASE.md` - release checklist and versioning
 
 ## Configuration Guide (Step-by-Step)
 

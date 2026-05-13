@@ -28,11 +28,14 @@ await build({
 
 await build({
   entryPoints: [resolve(root, "src/react/RedeemWidget.tsx")],
-  bundle: false,
+  bundle: true,
   format: "esm",
   outfile: resolve(distDir, "react/RedeemWidget.js"),
   sourcemap: true,
   target: "es2020",
+  jsx: "automatic",
+  external: ["react", "react-dom", "react/jsx-runtime"],
+  loader: { ".css": "empty" },
 });
 
 await cp(resolve(root, "src/styles/redeem-widget.css"), resolve(distDir, "redeem-widget.css"));
